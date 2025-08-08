@@ -1,0 +1,30 @@
+name: MacRDP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Start macOS RDP via VNC
+    runs-on: macos-latest
+
+    steps:
+      # 1. Télécharger et exécuter le setup (VNC + ngrok)
+      - name: Enabling Remote Access
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        run: |
+          curl -s -o start.sh -L "https://raw.githubusercontent.com/JohnnyNetsec/github-vm/main/mac/start.sh"
+          chmod +x start.sh
+          bash start.sh "$NGROK_AUTH_TOKEN"
+
+      # 2. Configurer le compte VNC (login & mot de passe)
+      - name: Log In Details To VNC Server
+        run: |
+          curl -s -o login.sh -L "https://raw.githubusercontent.com/JohnnyNetsec/github-vm/main/mac/login.sh"
+          chmod +x login.sh
+          bash login.sh
+
+      # 3. Lancer tmate pour l’accès terminal
+      - name: Share terminal via tmate
+        uses: mxschmitt/action-tmate@v2
